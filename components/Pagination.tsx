@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import type { CollectionQueryParams } from '@/lib/types'
 
 interface PaginationProps {
@@ -15,6 +15,7 @@ export default function Pagination({ params, totalPages, totalElements }: Pagina
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  const [jumpValue, setJumpValue] = useState('')
 
   if (totalPages <= 1) return null
 
@@ -101,6 +102,30 @@ export default function Pagination({ params, totalPages, totalElements }: Pagina
         >
           →
         </button>
+
+        {/* Jump to page */}
+        <div className="ml-2 flex items-center gap-1.5">
+          <span className="text-gray-400">Go to</span>
+          <input
+            type="number"
+            min={1}
+            max={totalPages}
+            value={jumpValue}
+            onChange={(e) => setJumpValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const page = parseInt(jumpValue, 10) - 1
+                if (!isNaN(page) && page >= 0 && page < totalPages) {
+                  setJumpValue('')
+                  goTo(page)
+                }
+              }
+            }}
+            placeholder={String(current + 1)}
+            className="w-14 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-center text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Jump to page"
+          />
+        </div>
       </div>
     </div>
   )
