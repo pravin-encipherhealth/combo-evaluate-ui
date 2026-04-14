@@ -54,18 +54,28 @@ export default function TicketDetailPage() {
     setLoading(true)
     setError('')
     try {
-      // Fetch pending tickets first; if this ticket is there, use it.
-      const { fetchPendingTickets } = await import('@/lib/workflow-api')
-      const pending = await fetchPendingTickets()
-      const found = pending.find((t) => t.id === ticketId)
-      if (found) {
-        setTicket(found)
+      const { fetchMyTickets, fetchPendingTickets } = await import('@/lib/workflow-api')
+
+      // All roles can access their own tickets — check here first
+      const mine = await fetchMyTickets()
+      const foundInMine = mine.find((t) => t.id === ticketId)
+      if (foundInMine) {
+        setTicket(foundInMine)
         return
       }
-      // If not in pending, we need audit history — but we need entityName+entityId.
-      // Since we can't look up by ticketId alone with current API,
-      // show a "not found in pending" message guiding user.
-      setError('Ticket not found in your pending queue. It may have already been resolved.')
+
+      // Supervisors can also view pending tickets raised by others
+      const userRole = user?.roleId ?? ''
+      if (canReviewTicket(userRole)) {
+        const pending = await fetchPendingTickets()
+        const foundInPending = pending.find((t) => t.id === ticketId)
+        if (foundInPending) {
+          setTicket(foundInPending)
+          return
+        }
+      }
+
+      setError('Ticket not found. It may have already been resolved.')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load ticket')
     } finally {
