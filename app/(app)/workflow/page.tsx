@@ -2,23 +2,43 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { fetchPendingTickets, type Ticket } from '@/lib/workflow-api'
-import { getAuthUser, canCreateTicket } from '@/lib/auth'
+import { fetchPendingTickets, fetchMyTickets, type Ticket } from '@/lib/workflow-api'
+import { getAuthUser, canCreateTicket, canReviewTicket } from '@/lib/auth'
 import TicketStatusBadge from '@/components/workflow/TicketStatusBadge'
 import { formatDate } from '@/lib/utils'
 
+type Tab = 'pending' | 'mine'
+
 export default function WorkflowPage() {
-  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [tab, setTab] = useState<Tab>('pending')
+  const [pendingTickets, setPendingTickets] = useState<Ticket[]>([])
+  const [myTickets, setMyTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const user = typeof window !== 'undefined' ? getAuthUser() : null
 
+  const canReview = user ? canReviewTicket(user.roleId) : false
+  const canCreate = user ? canCreateTicket(user.roleId) : false
+
+  // Coders can't review, default their view to "mine"
   useEffect(() => {
-    fetchPendingTickets()
-      .then(setTickets)
+    if (!canReview) setTab('mine')
+  }, [canReview])
+
+  useEffect(() => {
+    setLoading(true)
+    setError('')
+    const fetch = tab === 'pending' ? fetchPendingTickets : fetchMyTickets
+    fetch()
+      .then((data) => {
+        if (tab === 'pending') setPendingTickets(data)
+        else setMyTickets(data)
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [tab])
+
+  const tickets = tab === 'pending' ? pendingTickets : myTickets
 
   return (
     <div className="px-6 py-8 max-w-6xl mx-auto">
@@ -27,12 +47,10 @@ export default function WorkflowPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Approval Workflow</h1>
           <p className="mt-0.5 text-sm text-gray-500">
-            {user
-              ? `Showing tickets pending your review as ${user.roleDisplayName}`
-              : 'Pending tickets'}
+            {user ? `Logged in as ${user.displayName} · ${user.roleDisplayName}` : 'Tickets'}
           </p>
         </div>
-        {user && canCreateTicket(user.roleId) && (
+        {canCreate && (
           <Link
             href="/workflow/create"
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
@@ -43,6 +61,32 @@ export default function WorkflowPage() {
             New Ticket
           </Link>
         )}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 border-b border-gray-200">
+        {canReview && (
+          <button
+            onClick={() => setTab('pending')}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === 'pending'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Pending Review
+          </button>
+        )}
+        <button
+          onClick={() => setTab('mine')}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            tab === 'mine'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          My Tickets
+        </button>
       </div>
 
       {/* Loading */}
@@ -67,8 +111,12 @@ export default function WorkflowPage() {
           <svg className="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-3-3v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-sm font-medium text-gray-600">No pending tickets</p>
-          <p className="text-xs text-gray-400 mt-1">All caught up!</p>
+          <p className="text-sm font-medium text-gray-600">
+            {tab === 'pending' ? 'No pending tickets' : 'No tickets raised yet'}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            {tab === 'pending' ? 'All caught up!' : 'Tickets you create will appear here'}
+          </p>
         </div>
       )}
 
@@ -96,8 +144,12 @@ export default function WorkflowPage() {
                     {Object.keys(ticket.newData).length} field{Object.keys(ticket.newData).length !== 1 ? 's' : ''} changing
                   </span>
                   <span>·</span>
-                  <span>by {ticket.createdBy}</span>
-                  <span>·</span>
+                  {tab === 'pending' && (
+                    <>
+                      <span>by {ticket.createdBy}</span>
+                      <span>·</span>
+                    </>
+                  )}
                   <span>{formatDate(ticket.createdAt)}</span>
                 </div>
               </div>

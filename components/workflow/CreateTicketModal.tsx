@@ -15,6 +15,7 @@ interface CreateTicketModalProps {
 }
 
 const AUDIT_FIELDS = new Set(['active', 'createdBy', 'createdDate', 'updatedBy', 'updatedDate', '_id', 'id'])
+const AUDIT_DISPLAY_FIELDS = ['createdBy', 'createdDate', 'updatedBy', 'updatedDate']
 
 export default function CreateTicketModal({ entityName, entityId, row, onClose }: CreateTicketModalProps) {
   const router = useRouter()
@@ -25,12 +26,26 @@ export default function CreateTicketModal({ entityName, entityId, row, onClose }
   // Fields the user can click to add to the editor (exclude audit/id fields)
   const editableFields = Object.entries(row).filter(([key]) => !AUDIT_FIELDS.has(key))
 
+  // Audit fields shown read-only for reference
+  const auditFields = AUDIT_DISPLAY_FIELDS
+    .filter((key) => key in row)
+    .map((key) => ({ key, value: row[key] }))
+
   function addFieldFromRow(key: string, value: unknown) {
     const strValue = value === null || value === undefined
       ? ''
       : typeof value === 'object'
         ? JSON.stringify(value)
         : String(value)
+
+    // If key already exists, update it in place (prevents duplicate entries)
+    const existingIdx = pairs.findIndex((p) => p.key === key)
+    if (existingIdx !== -1) {
+      const next = [...pairs]
+      next[existingIdx] = { key, value: strValue }
+      setPairs(next)
+      return
+    }
 
     // If there's an empty row, fill it; otherwise append
     const emptyIdx = pairs.findIndex((p) => !p.key.trim())
@@ -122,6 +137,32 @@ export default function CreateTicketModal({ entityName, entityId, row, onClose }
                           + add
                         </span>
                       </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Audit fields - read only */}
+            {auditFields.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  Audit Info
+                </p>
+                <div className="rounded-lg border border-gray-100 bg-gray-50 divide-y divide-gray-100">
+                  {auditFields.map(({ key, value }) => {
+                    const display = value === null || value === undefined
+                      ? '—'
+                      : typeof value === 'object'
+                        ? JSON.stringify(value)
+                        : String(value)
+                    return (
+                      <div key={key} className="flex items-center gap-3 px-4 py-2">
+                        <span className="text-xs font-mono font-medium text-gray-400 w-40 shrink-0">
+                          {fieldLabel(key)}
+                        </span>
+                        <span className="text-xs text-gray-400 truncate">{display}</span>
+                      </div>
                     )
                   })}
                 </div>

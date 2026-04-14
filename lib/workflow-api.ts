@@ -91,6 +91,10 @@ export function fetchPendingTickets(): Promise<Ticket[]> {
   return wFetch<Ticket[]>('/api/v1/approval-tickets/pending')
 }
 
+export function fetchMyTickets(): Promise<Ticket[]> {
+  return wFetch<Ticket[]>('/api/v1/approval-tickets/my')
+}
+
 export function fetchAuditHistory(entityName: string, entityId: string): Promise<Ticket[]> {
   return wFetch<Ticket[]>(
     `/api/v1/approval-tickets/audit-history?entityName=${encodeURIComponent(entityName)}&entityId=${encodeURIComponent(entityId)}`,
