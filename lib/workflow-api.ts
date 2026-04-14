@@ -29,7 +29,7 @@ async function wFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export type TicketStatus =
   | 'PENDING_SUPERVISOR'
-  | 'PENDING_ENCIPHER'
+  | 'PENDING_SUPERADMIN'
   | 'APPROVED'
   | 'REJECTED'
 

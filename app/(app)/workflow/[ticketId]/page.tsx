@@ -140,7 +140,7 @@ export default function TicketDetailPage() {
   }
 
   const isPending =
-    ticket?.status === 'PENDING_SUPERVISOR' || ticket?.status === 'PENDING_ENCIPHER'
+    ticket?.status === 'PENDING_SUPERVISOR' || ticket?.status === 'PENDING_SUPERADMIN'
   const canReview = user ? canReviewTicket(user.roleId) : false
   const canEdit =
     user && ticket
@@ -285,7 +285,7 @@ export default function TicketDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="text-base font-semibold text-gray-900 mb-1">Edit Requested Changes</h3>
-            <p className="text-sm text-gray-500 mb-4">Modify the fields before forwarding to Encipher review.</p>
+            <p className="text-sm text-gray-500 mb-4">Modify the fields before forwarding to SuperAdmin review.</p>
             <div className="mb-4">
               <KeyValueEditor value={editPairs} onChange={setEditPairs} />
             </div>

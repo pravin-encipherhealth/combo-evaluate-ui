@@ -100,9 +100,9 @@ function LoginForm() {
           <div className="mt-6 rounded-lg bg-gray-50 border border-gray-200 p-3.5 space-y-1.5">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo accounts</p>
             {[
-              { user: 'coder',      role: '3Gen Coder' },
-              { user: 'supervisor', role: '3Gen Supervisor' },
-              { user: 'encipher',   role: 'Encipher Admin' },
+              { user: 'coder',      role: 'CODER' },
+              { user: 'supervisor', role: 'SUPERVISOR' },
+              { user: 'encipher',   role: 'SUPERADMIN' },
             ].map(({ user, role }) => (
               <button
                 key={user}
