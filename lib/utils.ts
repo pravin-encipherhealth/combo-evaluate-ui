@@ -82,7 +82,6 @@ export function orderColumns(keys: string[]): string[] {
 
   const entity = keys
     .filter((k) => !IDENTITY_FIELDS.includes(k) && !audit.has(k) && !hidden.has(k))
-    .sort()
 
   const auditOrdered = [
     'active',
