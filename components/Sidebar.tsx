@@ -85,12 +85,12 @@ export default function Sidebar({ collections }: SidebarProps) {
           Pending Tickets
         </NavLink>
 
-        <NavLink href="/workflow/create">
+        {/* <NavLink href="/workflow/create">
           <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           New Ticket
-        </NavLink>
+        </NavLink> */}
 
         {/* Collections section */}
         <div className="pt-4 pb-1">
