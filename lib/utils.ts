@@ -99,7 +99,8 @@ export function orderColumns(keys: string[]): string[] {
 export function deriveColumns(rows: Record<string, unknown>[]): string[] {
   const keySet = new Set<string>()
   rows.forEach((row) => Object.keys(row).forEach((k) => keySet.add(k)))
-  // Remove hidden fields
+  // Remove hidden and audit fields
   HIDDEN_FIELDS.forEach((k) => keySet.delete(k))
+  AUDIT_FIELDS.forEach((k) => keySet.delete(k))
   return orderColumns(Array.from(keySet))
 }
