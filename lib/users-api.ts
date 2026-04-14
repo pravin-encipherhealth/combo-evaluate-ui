@@ -53,7 +53,7 @@ export interface UpdateUserPayload {
 }
 
 export interface ChangePasswordPayload {
-  currentPassword: string
+  // currentPassword: string
   newPassword: string
   confirmPassword: string
 }
