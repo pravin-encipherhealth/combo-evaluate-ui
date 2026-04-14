@@ -14,8 +14,8 @@ interface CreateTicketModalProps {
   onClose: () => void
 }
 
-const AUDIT_FIELDS = new Set(['active', 'createdBy', 'createdDate', 'updatedBy', 'updatedDate', '_id', 'id'])
-const AUDIT_DISPLAY_FIELDS = ['createdBy', 'createdDate', 'updatedBy', 'updatedDate']
+const AUDIT_FIELDS = new Set(['active', 'createdBy', 'createdDate', 'lastModifiedBy', 'lastModifiedDate', 'version', '_id', 'id'])
+const AUDIT_DISPLAY_FIELDS = ['createdBy', 'createdDate', 'lastModifiedBy', 'lastModifiedDate']
 
 export default function CreateTicketModal({ entityName, entityId, row, onClose }: CreateTicketModalProps) {
   const router = useRouter()
