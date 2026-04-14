@@ -1,21 +1,29 @@
 'use client'
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import type { CollectionQueryParams, DocumentRow, SortDir } from '@/lib/types'
 import { fieldLabel, formatDate, isIsoDate } from '@/lib/utils'
+import CreateTicketModal from '@/components/workflow/CreateTicketModal'
 
 interface DataTableProps {
   columns: string[]
   rows: DocumentRow[]
   params: CollectionQueryParams
+  collectionAlias?: string
 }
 
-export default function DataTable({ columns, rows, params }: DataTableProps) {
+/** Convert kebab-case alias to PascalCase entity name, e.g. "three-combo" → "ThreeCombo" */
+function aliasToEntityName(alias: string): string {
+  return alias.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+}
+
+export default function DataTable({ columns, rows, params, collectionAlias }: DataTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  const [ticketRow, setTicketRow] = useState<DocumentRow | null>(null)
 
   function toggleSort(col: string) {
     const next = new URLSearchParams(searchParams.toString())
@@ -44,46 +52,78 @@ export default function DataTable({ columns, rows, params }: DataTableProps) {
     )
   }
 
+  const entityName = collectionAlias ? aliasToEntityName(collectionAlias) : ''
+
   return (
-    <div className={`overflow-x-auto transition-opacity ${isPending ? 'opacity-50' : ''}`}>
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead>
-          <tr className="bg-gray-50">
-            {columns.map((col) => {
-              const isSorted = params.sortBy === col
-              return (
-                <th
-                  key={col}
-                  scope="col"
-                  onClick={() => toggleSort(col)}
-                  className="cursor-pointer whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 hover:bg-gray-100 hover:text-gray-700 select-none"
-                >
-                  <span className="flex items-center gap-1">
-                    {fieldLabel(col)}
-                    <span className={`ml-0.5 ${isSorted ? 'text-blue-600' : 'text-gray-300'}`}>
-                      {isSorted
-                        ? params.sortDir === 'DESC' ? '↓' : '↑'
-                        : '↕'}
+    <>
+      <div className={`overflow-x-auto transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead>
+            <tr className="bg-gray-50">
+              {columns.map((col) => {
+                const isSorted = params.sortBy === col
+                return (
+                  <th
+                    key={col}
+                    scope="col"
+                    onClick={() => toggleSort(col)}
+                    className="cursor-pointer whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 hover:bg-gray-100 hover:text-gray-700 select-none"
+                  >
+                    <span className="flex items-center gap-1">
+                      {fieldLabel(col)}
+                      <span className={`ml-0.5 ${isSorted ? 'text-blue-600' : 'text-gray-300'}`}>
+                        {isSorted
+                          ? params.sortDir === 'DESC' ? '↓' : '↑'
+                          : '↕'}
+                      </span>
                     </span>
-                  </span>
+                  </th>
+                )
+              })}
+              {collectionAlias && (
+                <th scope="col" className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Actions
                 </th>
-              )
-            })}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 bg-white">
-          {rows.map((row, rowIdx) => (
-            <tr key={rowIdx} className="hover:bg-blue-50/40 transition-colors">
-              {columns.map((col) => (
-                <td key={col} className="whitespace-nowrap px-4 py-3 align-middle">
-                  <CellValue value={row[col]} columnKey={col} />
-                </td>
-              ))}
+              )}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-white">
+            {rows.map((row, rowIdx) => (
+              <tr key={rowIdx} className="hover:bg-blue-50/40 transition-colors">
+                {columns.map((col) => (
+                  <td key={col} className="whitespace-nowrap px-4 py-3 align-middle">
+                    <CellValue value={row[col]} columnKey={col} />
+                  </td>
+                ))}
+                {collectionAlias && (
+                  <td className="whitespace-nowrap px-4 py-3 align-middle">
+                    <button
+                      type="button"
+                      onClick={() => setTicketRow(row)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create Ticket
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {ticketRow && collectionAlias && (
+        <CreateTicketModal
+          entityName={entityName}
+          entityId={String(ticketRow._id ?? ticketRow.id ?? '')}
+          row={ticketRow}
+          onClose={() => setTicketRow(null)}
+        />
+      )}
+    </>
   )
 }
 

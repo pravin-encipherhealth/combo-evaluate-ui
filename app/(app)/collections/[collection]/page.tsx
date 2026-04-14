@@ -75,7 +75,7 @@ export default async function CollectionPage({
         </div>
 
         {/* Table */}
-        <DataTable columns={columns} rows={pageData.content} params={queryParams} />
+        <DataTable columns={columns} rows={pageData.content} params={queryParams} collectionAlias={collection} />
 
         {/* Pagination */}
         {pageData.totalPages > 1 && (
