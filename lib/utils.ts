@@ -82,7 +82,6 @@ export function orderColumns(keys: string[]): string[] {
 
   const entity = keys
     .filter((k) => !IDENTITY_FIELDS.includes(k) && !audit.has(k) && !hidden.has(k))
-    .sort()
 
   const auditOrdered = [
     'active',
@@ -99,8 +98,7 @@ export function orderColumns(keys: string[]): string[] {
 export function deriveColumns(rows: Record<string, unknown>[]): string[] {
   const keySet = new Set<string>()
   rows.forEach((row) => Object.keys(row).forEach((k) => keySet.add(k)))
-  // Remove hidden and audit fields
+  // Only remove truly hidden fields; audit fields are shown at the end via orderColumns
   HIDDEN_FIELDS.forEach((k) => keySet.delete(k))
-  AUDIT_FIELDS.forEach((k) => keySet.delete(k))
   return orderColumns(Array.from(keySet))
 }
