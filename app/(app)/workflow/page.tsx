@@ -10,20 +10,15 @@ import { formatDate } from '@/lib/utils'
 type Tab = 'pending' | 'mine'
 
 export default function WorkflowPage() {
-  const [tab, setTab] = useState<Tab>('pending')
+  const user = typeof window !== 'undefined' ? getAuthUser() : null
+  const canReview = user ? canReviewTicket(user.roleId) : false
+  const canCreate = user ? canCreateTicket(user.roleId) : false
+
+  const [tab, setTab] = useState<Tab>(canReview ? 'pending' : 'mine')
   const [pendingTickets, setPendingTickets] = useState<Ticket[]>([])
   const [myTickets, setMyTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const user = typeof window !== 'undefined' ? getAuthUser() : null
-
-  const canReview = user ? canReviewTicket(user.roleId) : false
-  const canCreate = user ? canCreateTicket(user.roleId) : false
-
-  // Coders can't review, default their view to "mine"
-  useEffect(() => {
-    if (!canReview) setTab('mine')
-  }, [canReview])
 
   useEffect(() => {
     setLoading(true)
