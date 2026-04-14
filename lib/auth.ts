@@ -62,6 +62,10 @@ export function canEditTicket(roleId: string): boolean {
   return roleId === 'SUPERVISOR'
 }
 
+export function canManageUsers(roleId: string): boolean {
+  return roleId === 'SUPERADMIN'
+}
+
 export function roleColor(roleId: string): string {
   switch (roleId) {
     case 'CODER':      return 'bg-blue-100 text-blue-700'
