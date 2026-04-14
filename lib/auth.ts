@@ -51,22 +51,22 @@ export function authHeaders(): Record<string, string> {
 // ---------------------------------------------------------------------------
 
 export function canCreateTicket(roleId: string): boolean {
-  return roleId === 'THREE_GEN_CODER' || roleId === 'THREE_GEN_SUPERVISOR'
+  return roleId === 'CODER' || roleId === 'SUPERVISOR'
 }
 
 export function canReviewTicket(roleId: string): boolean {
-  return roleId === 'THREE_GEN_SUPERVISOR' || roleId === 'ENCIPHER_SUPERVISOR'
+  return roleId === 'SUPERVISOR' || roleId === 'SUPERADMIN'
 }
 
 export function canEditTicket(roleId: string): boolean {
-  return roleId === 'THREE_GEN_SUPERVISOR'
+  return roleId === 'SUPERVISOR'
 }
 
 export function roleColor(roleId: string): string {
   switch (roleId) {
-    case 'THREE_GEN_CODER':      return 'bg-blue-100 text-blue-700'
-    case 'THREE_GEN_SUPERVISOR': return 'bg-violet-100 text-violet-700'
-    case 'ENCIPHER_SUPERVISOR':  return 'bg-emerald-100 text-emerald-700'
-    default:                     return 'bg-gray-100 text-gray-600'
+    case 'CODER':      return 'bg-blue-100 text-blue-700'
+    case 'SUPERVISOR': return 'bg-violet-100 text-violet-700'
+    case 'SUPERADMIN': return 'bg-emerald-100 text-emerald-700'
+    default:           return 'bg-gray-100 text-gray-600'
   }
 }
